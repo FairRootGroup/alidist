@@ -9,14 +9,10 @@ requires:
 build_requires:
   - CMake
 ---
-
 #!/bin/bash -e
 cmake $SOURCEDIR -DCMAKE_INSTALL_PREFIX=$INSTALLROOT -DROOT=ON  \
           -DBACKEND=Vc                                          \
-          -DVECGEOM_VECTOR=sse4.2                               \
-          -DBENCHMARK=ON                                        \
-          ${CXXSTD:+-DCMAKE_CXX_STANDARD=$CXXSTD}               \
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          -DVECGEOM_VECTOR=sse4.2
 
 make ${JOBS+-j $JOBS}
 make install

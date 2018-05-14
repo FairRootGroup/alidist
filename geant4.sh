@@ -1,27 +1,25 @@
 package: GEANT4
 version: "%(tag_basename)s%(defaults_upper)s"
-source: https://github.com/FairRootGroup/geant4
-tag: v10.4.0-fairroot
+source: https://github.com/Geant4/geant4
+tag: v10.3.3
 build_requires:
   - CMake
-  - "Xcode:(osx.*)"
-incremental_recipe: |
-  make ${JOBS:+-j$JOBS} install
-  mkdir -p $INSTALLROOT/etc/modulefiles && rsync -a --delete etc/modulefiles/ $INSTALLROOT/etc/modulefiles
 env:
-  G4INSTALL : $GEANT4_ROOT
-  G4DATASEARCHOPT : "-mindepth 2 -maxdepth 4 -type d -wholename"
-  G4LEDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*G4EMLOW*'`"
-  G4LEVELGAMMADATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*PhotonEvaporation*'`"
-  G4RADIOACTIVEDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*RadioactiveDecay*'`"
-  G4NEUTRONHPDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*G4NDL*'`"
-  G4NEUTRONXSDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*G4NEUTRONXS*'`"
-  G4SAIDXSDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT  '*data*G4SAIDDATA*'`"
-  G4PIIDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*G4PII*'`"
-  G4REALSURFACEDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*RealSurface*'`"
-  G4ENSDFSTATEDATA : "`find ${G4INSTALL} $G4DATASEARCHOPT '*data*G4ENSDFSTATE*'`"
+  G4INSTALL: "$GEANT4_ROOT"
+  G4INSTALL_DATA: "$GEANT4_ROOT/share/Geant4-10.3.3"
+  G4SYSTEM: "$(uname)-g++"
+  G4LEVELGAMMADATA:         "$GEANT4_ROOT/share/Geant4-10.3.3/data/PhotonEvaporation4.3.2"
+  G4RADIOACTIVEDATA:        "$GEANT4_ROOT/share/Geant4-10.3.3/data/RadioactiveDecay5.1.1"
+  G4LEDATA:                 "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4EMLOW6.50"
+  G4NEUTRONHPDATA:          "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4NDL4.5"
+  G4NEUTRONXSDATA:          "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4NEUTRONXS1.4"
+  G4SAIDXSDATA:             "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4SAIDDATA1.1"
+  G4NeutronHPCrossSections: "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4NDL"
+  G4PIIDATA:                "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4PII1.3"
+  G4REALSURFACEDATA:        "$GEANT4_ROOT/share/Geant4-10.3.3/data/RealSurface1.0"
+  G4ENSDFSTATEDATA:         "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4ENSDFSTATE2.1"
+  G4ABLADATA:               "$GEANT4_ROOT/share/Geant4-10.3.3/data/G4ABLA3.0"
 ---
-
 #!/bin/bash -e
 
 [[ "$CXXFLAGS" == *'-std=c++98'* ]] && CXX98=1 || true
@@ -47,49 +45,13 @@ cmake                                                 \
   -DGEANT4_USE_G3TOG4=ON                              \
   -DGEANT4_INSTALL_DATA=ON                            \
   -DGEANT4_USE_SYSTEM_EXPAT=OFF                       \
-  -DGEANT4_USE_OPENGL_X11=ON                          \
   ${CXX14:+-DGEANT4_BUILD_CXXSTD=c++14}               \
   ${CXX11:+-DGEANT4_BUILD_CXXSTD=c++11}               \
   ${CXX98:+-DGEANT4_BUILD_CXXSTD=c++98}               \
-  ${XERCESC_ROOT:+-DGEANT4_USE_OPENGL_X11=ON -DGEANT4_USE_GDML=ON -DXERCESC_ROOT_DIR=$XERCESC_ROOT} \
   $SOURCEDIR
 
 
 cmake --build . --target install ${JOBS:+-- -j$JOBS}
-
-# auto discovery of installation paths of G4 DATA
-# in order to avoid putting hard-coded version numbers (which change with every G4 tag)
-# these variables are used to create the modulefile below
-G4DATASEARCHOPT="-mindepth 2 -maxdepth 4 -type d -wholename"
-G4LEDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4EMLOW*"`
-G4LEVELGAMMADATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*PhotonEvaporation*"`
-G4RADIOACTIVEDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*RadioactiveDecay*"`
-G4NEUTRONHPDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4NDL*"`
-G4NEUTRONXSDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4NEUTRONXS*"`
-G4SAIDXSDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4SAIDDATA*"`
-G4PIIDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4PII*"`
-G4REALSURFACEDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*RealSurface*"`
-G4ENSDFSTATEDATA=`find ${INSTALLROOT} $G4DATASEARCHOPT "*data*G4ENSDFSTATE*"`
-
-ln -s lib $INSTALLROOT/lib64
-
-#Get data file versions:
-source $INSTALLROOT/bin/geant4.sh
-
-G4LEVELGAMMADATA_NAME=$(basename "$G4LEVELGAMMADATA")
-G4RADIOACTIVEDATA_NAME=$(basename "$G4RADIOACTIVEDATA")
-G4LEDATA_NAME=$(basename "$G4LEDATA")
-G4NEUTRONHPDATA_NAME=$(basename "$G4NEUTRONHPDATA")
-G4NEUTRONXSDATA_NAME=$(basename "$G4NEUTRONXSDATA")
-G4SAIDXSDATA_NAME=$(basename "$G4SAIDXSDATA")
-G4NEUTRONXSDATA_NAME=$(basename "$G4NEUTRONXSDATA")
-G4PIIDATA_NAME=$(basename "$G4PIIDATA")
-G4REALSURFACEDATA_NAME=$(basename "$G4REALSURFACEDATA")
-G4ENSDFSTATEDATA_NAME=$(basename "$G4ENSDFSTATEDATA")
-G4ABLADATA_NAME=$(basename "$G4ABLADATA")
-GEANT4_DATA_VERSION=$(dirname "$G4LEDATA")
-GEANT4_DATA_VERSION=$(dirname "$GEANT4_DATA_VERSION")
-GEANT4_DATA_VERSION=$(basename "$GEANT4_DATA_VERSION")
 
 # Modulefile
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
@@ -109,15 +71,14 @@ module load BASE/1.0
 set osname [uname sysname]
 setenv GEANT4_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 setenv G4INSTALL \$::env(GEANT4_ROOT)
-setenv G4INSTALL_DATA \$::env(G4INSTALL)/share/
+setenv G4INSTALL_DATA \$::env(GEANT4_ROOT)/share/Geant4-10.1.3
 setenv G4SYSTEM \$osname-g++
-setenv G4LEVELGAMMADATA $G4LEVELGAMMADATA
-setenv G4RADIOACTIVEDATA  $G4RADIOACTIVEDATA
-setenv G4LEDATA $G4LEDATA
-setenv G4NEUTRONHPDATA $G4NEUTRONHPDATA
-setenv G4NEUTRONXSDATA $G4NEUTRONXSDATA
-setenv G4SAIDXSDATA $G4SAIDXSDATA
-setenv G4ENSDFSTATEDATA $G4ENSDFSTATEDATA
+setenv G4LEVELGAMMADATA \$::env(G4INSTALL_DATA)/data/PhotonEvaporation3.1
+setenv G4RADIOACTIVEDATA  \$::env(G4INSTALL_DATA)/data/RadioactiveDecay4.2
+setenv G4LEDATA \$::env(G4INSTALL_DATA)/data/G4EMLOW6.41
+setenv G4NEUTRONHPDATA \$::env(G4INSTALL_DATA)/data/G4NDL4.5
+setenv G4NEUTRONXSDATA \$::env(G4INSTALL_DATA)/data/G4NEUTRONXS1.4
+setenv G4SAIDXSDATA \$::env(G4INSTALL_DATA)/data/G4SAIDDATA1.1
 prepend-path PATH \$::env(GEANT4_ROOT)/bin
 prepend-path LD_LIBRARY_PATH \$::env(GEANT4_ROOT)/lib
 $([[ ${ARCHITECTURE:0:3} == osx ]] && echo "prepend-path DYLD_LIBRARY_PATH \$::env(GEANT4_ROOT)/lib")
