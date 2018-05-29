@@ -6,12 +6,15 @@ build_requires:
   - CMake
 ---
 #!/bin/sh -e
-cmake $SOURCEDIR \
-  -DCMAKE_INSTALL_PREFIX:PATH="$INSTALLROOT"
-make ${JOBS+-j $JOBS}
-make install
 
-#ModuleFile
+cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
+      -DCMAKE_INSTALL_PREFIX=${INSTALLROOT}                      \
+      ${CXX_COMPILER:+-DCMAKE_CXX_COMPILER=$CXX_COMPILER}        \
+      $SOURCEDIR
+
+cmake --build . --target install ${JOBS:+-- -j$JOBS}
+
+# ModuleFile
 mkdir -p etc/modulefiles
 cat > etc/modulefiles/$PKGNAME <<EoF
 #%Module1.0

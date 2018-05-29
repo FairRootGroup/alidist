@@ -9,15 +9,15 @@ build_requires:
   - CMake
 ---
 #!/bin/sh -e
-printenv
-echo "ROOT_INCLUDE_PATH = "$ROOT_INCLUDE_PATH
-echo "EIGEN_INCLUDE_PATH = "$EIGEN_INCLUDE_PATH
-cmake $SOURCEDIR \
-  -DCMAKE_INSTALL_PREFIX:PATH="$INSTALLROOT"
-make ${JOBS+-j $JOBS}
-make install
 
-#ModuleFile
+cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
+      -DCMAKE_INSTALL_PREFIX=${INSTALLROOT}                      \
+      ${CXX_COMPILER:+-DCMAKE_CXX_COMPILER=$CXX_COMPILER}        \
+      $SOURCEDIR
+
+cmake --build . --target install ${JOBS:+-- -j$JOBS}
+
+# ModuleFile
 mkdir -p etc/modulefiles
 cat > etc/modulefiles/$PKGNAME <<EoF
 #%Module1.0
@@ -28,7 +28,7 @@ proc ModulesHelp { } {
 set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
-module load BASE/1.0                                                                    \\
+module load BASE/1.0                                                \\
             ${EIGEN_VERSION:+eigen/$EIGEN_VERSION-$EIGEN_REVISION}  \\
 # Our environment
 setenv GENFIT_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
