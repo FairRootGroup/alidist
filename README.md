@@ -1,7 +1,9 @@
 # Alfadist
+
 Recipes to build ALFA SW (i.e:FairRoot, FairMQ, DDS, etc), These recipes are used with AlfaBuild (Alibuild) to build the software, see below.  
 
-# AliBuild/AlfaBuild
+
+## AliBuild/AlfaBuild
 
 aliBuild is a tool to simplify building and installing ALICE / ALFA software. _(AlfaBuild is identical to AliBuild except that it expect the recipes to be in Alfadist by default)_ The tool itself is available as a standard PyPi package. You can install it via:
 
@@ -19,7 +21,6 @@ Once you have obtained both repository, you can trigger a build via:
 
 `alfaBuild [-d] -j <jobs> build <package>`
 
-
 * < package>: is the name of the package you want to build, e.g.:
   * FairRoot
   * FairMQ
@@ -28,7 +29,8 @@ Once you have obtained both repository, you can trigger a build via:
 * -d can be used to have verbose debug output.
 * < jobs> is the maximum number of parallel processes to be used for building where possible (defaults to the number of CPUs available if omitted).
 
-# Results of a build
+
+## Results of a build
 
 By default (can be changed using the -c option) the installation of your builds can be found in:
 
@@ -40,12 +42,10 @@ where:
 * < package-version>: is the same as the one found in the related recipe in alfadist.
 * < package-revision>: is the number of times you rebuilt the same version of a package, using a different recipe. In general this will be 1.
 
-
 For a full documentation of the AliBuild/AlfaBuild tool please see [here](https://alisw.github.io/alibuild/)
 
 
-
-# Guidelines for commit messages
+## Guidelines for commit messages
 
 - Keep the first line of the commit below 50 chars
 - Leave the second line empty
@@ -55,9 +55,7 @@ For a full documentation of the AliBuild/AlfaBuild tool please see [here](https:
 - Make sure you squash / cleanup your commits when it makes sense (e.g. if they are really one the fix of the other). Keep history clean.
 
 
-
-
-# Guidelines for contributing recipes
+## Guidelines for contributing recipes
 
 - Keep things simple (but concise).
 - Use 2 spaces to indent them.
@@ -67,8 +65,21 @@ For a full documentation of the AliBuild/AlfaBuild tool please see [here](https:
 ```
 rsync -a $SOURCEDIR ./
 ```
+- When building with CMake, start with following template and add/modify the options to your needs ($SOURCEDIR should be the last argument passed):
 
-# Guidelines for handling externals sources
+```
+cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
+      -DCMAKE_INSTALL_PREFIX=${INSTALLROOT}                      \
+      ${C_COMPILER:+-DCMAKE_C_COMPILER=$C_COMPILER}              \
+      ${CXX_COMPILER:+-DCMAKE_CXX_COMPILER=$CXX_COMPILER}        \
+      $SOURCEDIR
+
+cmake --build . --target install ${JOBS:+-- -j$JOBS}
+
+```
+- If in doubt, use `#!/bin/sh -e` as the default shebang line in the build recipe.
+
+## Guidelines for handling external sources
 
 Whenever you need to build a new external, you should consider the following:
 
