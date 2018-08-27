@@ -19,7 +19,6 @@ cmake                                                                 \
 make ${JOBS+-j$JOBS}
 make install
 ln -s libpythia6.so $INSTALLROOT/lib/libPythia6.so
-tar -c lib include | tar -x -C $INSTALLROOT
 
 # Modulefile
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
