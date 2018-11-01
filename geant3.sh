@@ -7,7 +7,6 @@ build_requires:
   - CMake
   - "Xcode:(osx.*)"
 source: https://github.com/FairRootGroup/geant3.git
-tag: v2-5
 prepend_path:
   "LD_LIBRARY_PATH": "$GEANT3_ROOT/lib64"
   "DYLD_LIBRARY_PATH": "$GEANT3_ROOT/lib64"
