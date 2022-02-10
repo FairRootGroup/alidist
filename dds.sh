@@ -49,5 +49,7 @@ mkdir -p etc/modulefiles
 alibuild-generate-module --bin --lib > etc/modulefiles/$PKGNAME
 cat >> etc/modulefiles/$PKGNAME <<EoF
 setenv DDS_ROOT \$PKG_ROOT
+setenv DDS_LOCATION \$PKG_ROOT
 EoF
+# Removal of requirement of $DDS_LOCATION env variable requested in https://github.com/FairRootGroup/DDS/issues/277
 mkdir -p $INSTALLROOT/etc/modulefiles && rsync -a --delete etc/modulefiles/ $INSTALLROOT/etc/modulefiles
